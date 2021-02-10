@@ -1,5 +1,6 @@
 require('dotenv-safe').config();
 
+const twilio = require("twilio")();
 const axios = require('axios');
 const schedule = require('node-schedule');
 const KrakenClient = require('kraken-api');
@@ -63,6 +64,13 @@ const job = schedule.scheduleJob(`*/${interval} * * * * *`, async () => {
                 bought = true;
             }
 
+            // TEXT ME
+            await client.messages.create({
+                body: `${user} just tweeted: "${tweet.text}". Bought 50 DOGE.`,
+                from: "+16087655499",
+                to: '+447598943677',
+            });
+
             const sellDate = add(now, { minutes: sell_delay });
 
             schedule.scheduleJob(sellDate, async () => {
@@ -79,6 +87,13 @@ const job = schedule.scheduleJob(`*/${interval} * * * * *`, async () => {
                 if (! response.error.length) {
                     bought = false;
                 }
+
+                // TEXT ME
+                await client.messages.create({
+                    body: `SOLD 50 DOGE.`,
+                    from: "+16087655499",
+                    to: '+447598943677',
+                });
             })
         } else {
             console.log('This tweet does not mention DOGE :(');

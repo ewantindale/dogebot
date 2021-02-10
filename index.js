@@ -21,16 +21,23 @@ async function getLatestTweet(account) {
     return tweet;
 }
 
-const user = 'code_to_freedom';
+async function getBalance() {
+    const balance = await kraken.api('Balance');
+
+    return balance.result;
+}
+
+const user = 'elonmusk';
 const interval = 10; // seconds
 const sell_delay = 5; // minutes
 let bought = false;
 
 const job = schedule.scheduleJob(`*/${interval} * * * * *`, async () => {
     const now = new Date();
-    const balance = await kraken.api('Balance');
-    const BTC_balance = Number(balance.result['XXBT'] || 0).toFixed(8);
-    const XDG_balance = Number(balance.result['XXDG'] || 0).toFixed(8);
+
+    const balance = await getBalance();
+    const BTC_balance = Number(balance['XXBT'] || 0).toFixed(8);
+    const XDG_balance = Number(balance['XXDG'] || 0);
 
     console.log(`Current balance: ${BTC_balance} BTC | ${XDG_balance} DOGE`);
 
@@ -64,9 +71,13 @@ const job = schedule.scheduleJob(`*/${interval} * * * * *`, async () => {
                 bought = true;
             }
 
+            const balance = await getBalance();
+            const BTC_balance = Number(balance['XXBT'] || 0).toFixed(8);
+            const XDG_balance = Number(balance['XXDG'] || 0);
+
             // TEXT ME
-            await client.messages.create({
-                body: `${user} just tweeted: "${tweet.text}". Bought 50 DOGE.`,
+            await twilio.messages.create({
+                body: `${user} just tweeted: "${tweet.text}". Bought 50 DOGE. Balance: ${BTC_balance} BTC | ${XDG_balance} DOGE`,
                 from: "+16087655499",
                 to: '+447598943677',
             });
@@ -74,7 +85,7 @@ const job = schedule.scheduleJob(`*/${interval} * * * * *`, async () => {
             const sellDate = add(now, { minutes: sell_delay });
 
             schedule.scheduleJob(sellDate, async () => {
-                console.log('5 minutes have passed since we bought. SELLING.');
+                console.log(`${sell_delay} minutes have passed since we bought. SELLING.`);
 
                 // SELL 50 DOGECOIN
                 const response = await kraken.api('AddOrder', {
@@ -88,9 +99,13 @@ const job = schedule.scheduleJob(`*/${interval} * * * * *`, async () => {
                     bought = false;
                 }
 
+                const balance = await getBalance();
+                const BTC_balance = Number(balance['XXBT'] || 0).toFixed(8);
+                const XDG_balance = Number(balance['XXDG'] || 0);
+
                 // TEXT ME
-                await client.messages.create({
-                    body: `SOLD 50 DOGE.`,
+                await twilio.messages.create({
+                    body: `SOLD 50 DOGE. Balance: ${BTC_balance} BTC | ${XDG_balance} DOGE`,
                     from: "+16087655499",
                     to: '+447598943677',
                 });

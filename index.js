@@ -35,12 +35,6 @@ let bought = false;
 const job = schedule.scheduleJob(`*/${interval} * * * * *`, async () => {
     const now = new Date();
 
-    const balance = await getBalance();
-    const BTC_balance = Number(balance['XXBT'] || 0).toFixed(8);
-    const XDG_balance = Number(balance['XXDG'] || 0);
-
-    console.log(`Current balance: ${BTC_balance} BTC | ${XDG_balance} DOGE`);
-
     const displayDate = format(now, 'yyyy/MM/dd hh:mm:ss');
     console.log(`${displayDate}: Checking for tweets...`);
 

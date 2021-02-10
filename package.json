@@ -1,0 +1,14 @@
+{
+  "name": "dogebot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "date-fns": "^2.17.0",
+    "dotenv-safe": "^8.2.0",
+    "kraken-api": "^1.0.1",
+    "node-schedule": "^2.0.0",
+    "twilio": "^3.55.1"
+  }
+}

@@ -29,7 +29,8 @@ async function getBalance() {
 
 const user = 'elonmusk';
 const interval = 10; // seconds
-const sell_delay = 5; // minutes
+const sellDelay = 5; // minutes
+const volume = 100; // doge coins
 let bought = false;
 
 const job = schedule.scheduleJob(`*/${interval} * * * * *`, async () => {
@@ -53,12 +54,12 @@ const job = schedule.scheduleJob(`*/${interval} * * * * *`, async () => {
         if (text.toLowerCase().includes('doge') && ! bought) {
             console.log('This tweet mentions DOGE. BUYING.');
 
-            // BUY 50 DOGECOIN
+            // BUY DOGECOIN
             const response = await kraken.api('AddOrder', {
                 pair: 'XXDGXXBT',
                 type: 'buy',
                 ordertype: 'market',
-                volume: 50
+                volume: volume
             });
 
             if (! response.error.length) {
@@ -71,22 +72,22 @@ const job = schedule.scheduleJob(`*/${interval} * * * * *`, async () => {
 
             // TEXT ME
             await twilio.messages.create({
-                body: `${user} just tweeted: "${tweet.text}". Bought 50 DOGE. Balance: ${BTC_balance} BTC | ${XDG_balance} DOGE`,
+                body: `${user} just tweeted: "${tweet.text}". Bought ${volume} DOGE. Balance: ${BTC_balance} BTC | ${XDG_balance} DOGE`,
                 from: "+16087655499",
-                to: '+447598943677',
+                to: process.env.PHONE_NUMBER,
             });
 
-            const sellDate = add(now, { minutes: sell_delay });
+            const sellDate = add(now, { minutes: sellDelay });
 
             schedule.scheduleJob(sellDate, async () => {
-                console.log(`${sell_delay} minutes have passed since we bought. SELLING.`);
+                console.log(`${sellDelay} minutes have passed since we bought. SELLING.`);
 
-                // SELL 50 DOGECOIN
+                // SELL DOGECOIN
                 const response = await kraken.api('AddOrder', {
                     pair: 'XXDGXXBT',
                     type: 'sell',
                     ordertype: 'market',
-                    volume: 50
+                    volume: volume
                 });
 
                 if (! response.error.length) {
@@ -99,9 +100,9 @@ const job = schedule.scheduleJob(`*/${interval} * * * * *`, async () => {
 
                 // TEXT ME
                 await twilio.messages.create({
-                    body: `SOLD 50 DOGE. Balance: ${BTC_balance} BTC | ${XDG_balance} DOGE`,
+                    body: `SOLD ${volume} DOGE. Balance: ${BTC_balance} BTC | ${XDG_balance} DOGE`,
                     from: "+16087655499",
-                    to: '+447598943677',
+                    to: process.env.PHONE_NUMBER,
                 });
             })
         } else {

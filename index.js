@@ -29,7 +29,7 @@ async function getBalance() {
 
 const user = 'elonmusk';
 const interval = 10; // seconds
-const sellDelay = 5; // minutes
+const sellDelay = 2; // minutes
 const volume = 100; // doge coins
 let bought = false;
 
